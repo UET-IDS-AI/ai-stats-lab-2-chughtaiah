@@ -1,15 +1,12 @@
 """
-AI Mathematical Tools – Probability & Random Variables
-
-Instructions:
-- Implement ALL functions.
-- Do NOT change function names or signatures.
-- Do NOT print inside functions.
-- You may use: math, numpy, matplotlib.
+AI_stats_lab.py
+Instructor Sample Solution
 """
 
 import math
 import numpy as np
+import matplotlib
+matplotlib.use("Agg")   # Prevent GUI issues in CI
 import matplotlib.pyplot as plt
 
 
@@ -18,32 +15,23 @@ import matplotlib.pyplot as plt
 # ============================================================
 
 def probability_union(PA, PB, PAB):
-    """
-    P(A ∪ B) = P(A) + P(B) - P(A ∩ B)
-    """
-    pass
+    return PA + PB - PAB
 
 
 def conditional_probability(PAB, PB):
-    """
-    P(A|B) = P(A ∩ B) / P(B)
-    """
-    pass
+    if PB == 0:
+        raise ValueError("Cannot divide by zero.")
+    return PAB / PB
 
 
 def are_independent(PA, PB, PAB, tol=1e-9):
-    """
-    True if:
-        |P(A ∩ B) - P(A)P(B)| < tol
-    """
-    pass
+    return abs(PAB - PA * PB) < tol
 
 
 def bayes_rule(PBA, PA, PB):
-    """
-    P(A|B) = P(B|A)P(A) / P(B)
-    """
-    pass
+    if PB == 0:
+        raise ValueError("Cannot divide by zero.")
+    return (PBA * PA) / PB
 
 
 # ============================================================
@@ -51,18 +39,19 @@ def bayes_rule(PBA, PA, PB):
 # ============================================================
 
 def bernoulli_pmf(x, theta):
-    """
-    f(x, theta) = theta^x (1-theta)^(1-x)
-    """
-    pass
+    if x not in (0, 1):
+        return 0.0
+    return (theta ** x) * ((1 - theta) ** (1 - x))
 
 
 def bernoulli_theta_analysis(theta_values):
-    """
-    Returns:
-        (theta, P0, P1, is_symmetric)
-    """
-    pass
+    results = []
+    for theta in theta_values:
+        P0 = 1 - theta
+        P1 = theta
+        is_symmetric = abs(P0 - P1) < 1e-9
+        results.append((theta, P0, P1, is_symmetric))
+    return results
 
 
 # ============================================================
@@ -70,22 +59,37 @@ def bernoulli_theta_analysis(theta_values):
 # ============================================================
 
 def normal_pdf(x, mu, sigma):
-    """
-    Normal PDF:
-        1/(sqrt(2π)σ) * exp(-(x-μ)^2 / (2σ^2))
-    """
-    pass
+    return (1 / (math.sqrt(2 * math.pi) * sigma)) * \
+           math.exp(-((x - mu) ** 2) / (2 * sigma ** 2))
 
 
 def normal_histogram_analysis(mu_values,
                               sigma_values,
                               n_samples=10000,
                               bins=30):
-    """
-    For each (mu, sigma):
 
-    Return:
-        (
+    results = []
+
+    for mu, sigma in zip(mu_values, sigma_values):
+
+        samples = np.random.normal(mu, sigma, n_samples)
+
+        # Plot histogram
+        plt.figure()
+        plt.hist(samples, bins=bins)
+        plt.title(f"Normal(mu={mu}, sigma={sigma})")
+        plt.close()
+
+        sample_mean = np.mean(samples)
+        sample_variance = np.var(samples)
+
+        theoretical_mean = mu
+        theoretical_variance = sigma ** 2
+
+        mean_error = abs(sample_mean - theoretical_mean)
+        variance_error = abs(sample_variance - theoretical_variance)
+
+        results.append((
             mu,
             sigma,
             sample_mean,
@@ -94,9 +98,9 @@ def normal_histogram_analysis(mu_values,
             sample_variance,
             theoretical_variance,
             variance_error
-        )
-    """
-    pass
+        ))
+
+    return results
 
 
 # ============================================================
@@ -104,28 +108,40 @@ def normal_histogram_analysis(mu_values,
 # ============================================================
 
 def uniform_mean(a, b):
-    """
-    (a + b) / 2
-    """
-    pass
+    return (a + b) / 2
 
 
 def uniform_variance(a, b):
-    """
-    (b - a)^2 / 12
-    """
-    pass
+    return ((b - a) ** 2) / 12
 
 
 def uniform_histogram_analysis(a_values,
                                b_values,
                                n_samples=10000,
                                bins=30):
-    """
-    For each (a, b):
 
-    Return:
-        (
+    results = []
+
+    for a, b in zip(a_values, b_values):
+
+        samples = np.random.uniform(a, b, n_samples)
+
+        # Plot histogram
+        plt.figure()
+        plt.hist(samples, bins=bins)
+        plt.title(f"Uniform(a={a}, b={b})")
+        plt.close()
+
+        sample_mean = np.mean(samples)
+        sample_variance = np.var(samples)
+
+        theoretical_mean = (a + b) / 2
+        theoretical_variance = ((b - a) ** 2) / 12
+
+        mean_error = abs(sample_mean - theoretical_mean)
+        variance_error = abs(sample_variance - theoretical_variance)
+
+        results.append((
             a,
             b,
             sample_mean,
@@ -134,10 +150,6 @@ def uniform_histogram_analysis(a_values,
             sample_variance,
             theoretical_variance,
             variance_error
-        )
-    """
-    pass
+        ))
 
-
-if __name__ == "__main__":
-    print("Implement all required functions.")
+    return results
